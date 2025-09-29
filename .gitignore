@@ -1,7 +1,4 @@
 # Ignore virtual environments
-cgm-env/
-data
-storage
 
 # Optionally ignore other common files
 __pycache__/

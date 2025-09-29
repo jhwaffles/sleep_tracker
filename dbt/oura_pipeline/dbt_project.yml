@@ -1,0 +1,28 @@
+# File: dbt/oura_pipeline/dbt_project.yml
+
+name: 'oura_pipeline'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'oura_pipeline'
+
+# These are the paths where dbt will look for files.
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# This configures how your models will be built.
+# We are telling dbt to build everything in the 'staging' folder as views
+# and everything in the 'intermediate' and 'marts' folders as tables.
+models:
+  oura_pipeline:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: table
+    marts:
+      +materialized: table
