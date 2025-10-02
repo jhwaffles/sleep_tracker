@@ -1,8 +1,8 @@
 SELECT
 id,
-day,
-score AS sleep_score,
-timestamp,
+cast(day AS date),
+score::INTEGER AS sleep_score,
+cast(timestamp AS timestamptz),
 (contributors::jsonb ->> 'efficiency')::INTEGER AS sleep_score_contributor_efficiency,
 (contributors::jsonb ->> 'latency')::INTEGER AS sleep_score_contributor_latency,
 (contributors::jsonb ->> 'rem_sleep')::INTEGER AS sleep_score_contributor_rem_sleep,

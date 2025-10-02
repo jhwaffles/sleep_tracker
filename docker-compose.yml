@@ -14,6 +14,18 @@ services:
       - "5432:5432" # Expose the container's port 5432 to your localhost
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  
+  dashboard:
+    container_name: oura_dashboard
+    build: ./dashboard
+    restart: always
+    ports:
+      - "8501:8501" #exposes streamlit port to local machine
+    env_file:
+      - .env #passes .env variables like DATABASE_URL to the container
+    depends_on:
+      - db  #start db before dashboard
+    volumes:
+      - ./dashboard:/app
 volumes:
   postgres_data:

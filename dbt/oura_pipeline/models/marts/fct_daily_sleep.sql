@@ -17,7 +17,7 @@ SELECT
     daily_sleep.sleep_score_contributor_timing,
     daily_sleep.sleep_score_contributor_total_sleep,
     sleep_records.day,
-    (sleep_records.day::TIMESTAMPTZ - INTERVAL '1 day') AS day_minus_one,
+    (sleep_records.day - INTERVAL '1 day') AS day_minus_one,
     sleep_records.awake_time,
     sleep_records.bedtime_end,
     sleep_records.bedtime_start,

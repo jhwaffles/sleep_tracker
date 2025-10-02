@@ -1,0 +1,5 @@
+# File: dashboard/requirements.txt
+streamlit
+pandas
+sqlalchemy
+psycopg2-binary
