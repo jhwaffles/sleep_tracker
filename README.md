@@ -1,26 +1,26 @@
-/oura-sleep-analysis/
-├── .env                  # <-- Your secrets live here (NEVER commit to Git)
-├── .gitignore            # <-- Tell Git to ignore .env, __pycache__, etc.
-├── docker-compose.yml    # <-- The master file to launch all your services
-├── README.md             # <-- Your project's documentation
+/sleep_tracker/
+├── .env                  
+├── .gitignore            
+├── docker-compose.yml    
+├── README.md             
 │
 ├── airflow/
-│   ├── Dockerfile          # <-- Instructions to build the Airflow service
-│   ├── dags/               # <-- Your main pipeline Python script goes here
+│   ├── Dockerfile          
+│   ├── dags/               
 │   │   └── oura_elt_dag.py
 │   ├── logs/
-│   └── requirements.txt    # <-- Python packages for your Airflow tasks
+│   └── requirements.txt    
 │
 ├── dbt/
-│   ├── models/             # <-- Your SQL transformation files go here
+│   ├── models/            
 │   │   ├── staging/
 │   │   └── marts/
-│   └── dbt_project.yml     # <-- dbt project configuration
+│   └── dbt_project.yml     
 │
 └── dashboard/
-    ├── Dockerfile          # <-- Instructions to build the Streamlit service
-    ├── app.py              # <-- The Python code for your Streamlit dashboard
-    └── requirements.txt    # <-- Python packages for your dashboard
+    ├── Dockerfile          
+    ├── app.py              
+    └── requirements.txt   
 
 ## Local Setup
 

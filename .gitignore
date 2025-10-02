@@ -2,6 +2,7 @@
 
 # Optionally ignore other common files
 __pycache__/
+/practice
 *.pyc
 .env
 .ipynb_checkpoints
