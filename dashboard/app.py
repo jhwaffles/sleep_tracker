@@ -41,7 +41,7 @@ def load_data(query):
 def load_timeseries_data(selected_day):
     """Function to load time-series data for a specific day."""
     # Use parameterized query for safety
-    query = text("SELECT timestamp, metric_name, metric_value FROM int_sleep_timeseries WHERE day = :day ORDER BY timestamp")
+    query = text("SELECT * FROM ml_features_simple WHERE day = :day ORDER BY epoch_timestamp")
     try:
         with engine.connect() as connection:
             df = pd.read_sql(query, connection, params={'day': selected_day})
@@ -110,21 +110,19 @@ with tab2:
             st.warning(f"No time-series data found for {selected_day}.")
         else:
             # --- NEW: Loop to create four separate plots ---
-            ts_metrics_to_plot = ['hrv', 'heart_rate', 'movement', 'sleep_phase']
+            ts_metrics_to_plot = ['hrv', 'heart_rate', 'max_movement', 'avg_movement','sleep_phase','disruption_score']
 
             for metric in ts_metrics_to_plot:
                 # Create a more descriptive title
                 st.subheader(f"{metric.replace('_', ' ').title()} Trend")
 
-                # Filter the dataframe for the specific metric
-                metric_df = df_timeseries[df_timeseries['metric_name'] == metric]
-
-                if not metric_df.empty:
+                
+                if not df_timeseries[metric].empty:
                     # Plot the individual metric
                     st.line_chart(
-                        metric_df,
-                        x='timestamp',
-                        y='metric_value'
+                        df_timeseries,
+                        x='epoch_timestamp',
+                        y=metric
                     )
                 else:
                     st.write(f"No data available for '{metric}' on this day.")

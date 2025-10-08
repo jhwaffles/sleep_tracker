@@ -4,6 +4,7 @@ WITH sleep_records AS (
     SELECT * FROM {{ ref('stg_sleep') }}
 ),
 
+--hrv 5 minutes
 hrv_base AS (
     SELECT
         sleep_records.id AS sleep_id,
@@ -22,6 +23,7 @@ hrv_base AS (
         sleep_records.hrv IS NOT NULL AND hrv_data.value IS NOT NULL
 ),
 
+--hr 5 minutes
 heart_rate_base AS (
     SELECT
         sleep_records.id AS sleep_id,
@@ -39,9 +41,9 @@ heart_rate_base AS (
         sleep_records.hrv IS NOT NULL AND heart_rate_data.value IS NOT NULL
 ),
 
-
+--movement every 30 seconds
 movement_base AS (
-    SELECT
+    SELECT 
         sleep_records.id AS sleep_id,
         sleep_records.day,
         (
@@ -57,6 +59,7 @@ movement_base AS (
 
 ),
 
+--sleep phase every 5 min
 sleep_phase_base AS (
     SELECT
         sleep_records.id AS sleep_id,

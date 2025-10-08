@@ -5,7 +5,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from pathlib import Path
-from datetime import date
+from datetime import date, timedelta
 
 load_dotenv()
 ACCESS_TOKEN = os.getenv("OURA_API_TOKEN")
@@ -59,59 +59,39 @@ def fetch_daily_sleep_data(start_date, end_date):  #Daily Sleep Routes Multiple.
 
 def get_and_cache_oura_data(endpoint, start_date, end_date=None):
     """
-    Checks for a local JSON file in DATA_DIR. If it exists, returns the data.
-    If not, it calls the Oura API, saves the result in db, and then returns the data.
+    TEMPORARY DEBUGGING FUNCTION to test only the database write.
     """
-    if end_date is None:
-        end_date = date.today().isoformat() #Gets today's date as "YYYY-MM-DD"
+    table_name = f"raw_{endpoint}"
+    print(f"--- STARTING DEBUG TEST for table: {table_name} ---")
 
-    table_name=f"raw_{endpoint}"
+    # 1. Create a simple, hardcoded DataFrame
+    data = {'day': ['2025-10-01'], 'id': ['test-id-123'], 'score': [99]}
+    df = pd.DataFrame(data)
+    print("Created a test DataFrame:")
+    print(df)
 
+    # 2. Attempt to save this DataFrame
     try:
-        query = text(f"SELECT 1 FROM {table_name} WHERE day BETWEEN :start AND :end LIMIT 1")
+        print(f"Attempting to save to '{table_name}'...")
         with db_engine.connect() as connection:
-            result = connection.execute(query, {"start": start_date, "end": end_date}).scalar()
-        if result is not None:
-            print(f"Reading data for '{endpoint}' from PostgreSQL cache...")
-            read_query = text(f"SELECT * FROM {table_name} WHERE day BETWEEN :start AND :end")
-            df = pd.read_sql(read_query, con=db_engine, params={"start": start_date, "end": end_date})
-            return df.to_dict('records')
+            df.to_sql(
+                table_name,
+                con=connection,
+                if_exists='append',
+                index=False
+            )
+            connection.commit()
+        print("SUCCESS: Save command executed and transaction committed.")
     except Exception as e:
-        print(f"Could not read from table '{table_name}'. It might not exist yet.")
-        data_exists=False
-    
-    print(f"Data not found in cache. Calling Oura Ring API for '{endpoint}'...")
-    params={"start_date": start_date, "end_date":end_date}
-    api_data=fetch_oura_data(endpoint, params)  #take 
+        print(f"ERROR: An exception occurred during the save operation: {e}")
 
-    if api_data and 'data' in api_data and api_data['data']: #triple condition check
-        df = pd.DataFrame(api_data['data'])
+    # For this test, we just return the DataFrame we tried to save
+    return df.to_dict('records')
 
-        for col in df.columns:
-            if df[col].dropna().apply(lambda x: isinstance(x, (dict, list))).any():  #checks if the col is a dictinoary or list
-                print(f"Converting nested column '{col}' to JSON string.")
-                df[col] = df[col].apply(lambda x: json.dumps(x) if x is not None else None)  #dumps nested data into json text
-        print(f"Saving {len(df)} records to {table_name} table...")
-        
-        try:
-            with db_engine.connect() as connection:
-                df.to_sql(
-                    table_name,
-                    con=db_engine,
-                    if_exists='append',
-                    index=False
-                )
-                connection.commit()
-            print("Save successful.")
-        except Exception as e:
-            print(f"An error occured while saving to the database: {e}")
-        return api_data['data']
-    return None #if API calls fails or there's no data
-# Main function to get the data (either from cache or API)
 if __name__ == "__main__":
     # Define the date range (format: YYYY-MM-DD)
-    start_date = "2025-01-25" #define
-    end_date = "2025-09-23"  #override if necessary
+    start_date = "2025-01-25"
+    end_date = None
 
     print("--- Getting detailed sleep data ---")
     sleep_data = get_and_cache_oura_data("sleep", start_date, end_date)

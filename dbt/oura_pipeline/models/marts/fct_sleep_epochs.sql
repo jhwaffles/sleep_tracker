@@ -11,30 +11,33 @@ WITH timeseries AS (
 movement AS (
     SELECT
         sleep_id,
+        day,
         DATE_TRUNC('hour', timestamp) +
-            (EXTRACT(minute FROM timestamp)::int/5*5)*INTERVAL '1 minute' AS epoch_timestamp --floor division trick
+            (EXTRACT(minute FROM timestamp)::int/5*5)*INTERVAL '1 minute' AS epoch_timestamp, --floor division trick
         MAX(metric_value) AS max_movement,
         AVG(metric_value) AS avg_movement
     FROM timeseries
     WHERE metric_name = 'movement'
-    GROUP BY sleep_id, epoch_timestamp
+    GROUP BY sleep_id, day, epoch_timestamp
 ),
 
 pivoted AS (
     SELECT 
         sleep_id,
+        day,
         DATE_TRUNC('hour', timestamp) +
-            (EXTRACT(minute FROM timestamp)::int/5*5)*INTERVAL '1 minute' AS epoch_timestamp --floor division trick
+            (EXTRACT(minute FROM timestamp)::int/5*5)*INTERVAL '1 minute' AS epoch_timestamp, --floor division trick
         MAX(CASE WHEN metric_name = 'hrv' THEN metric_value END) AS hrv,
         MAX(CASE WHEN metric_name = 'heart_rate' THEN metric_value END) AS heart_rate,
         MAX(CASE WHEN metric_name = 'sleep_phase' THEN metric_value END) AS sleep_phase
     FROM timeseries
     WHERE metric_name IN ('hrv','heart_rate','sleep_phase')
-    GROUP BY sleep_id, epoch_timestamp
+    GROUP BY sleep_id, day, epoch_timestamp
 )
 
 SELECT
     pivoted.sleep_id,
+    pivoted.day,
     pivoted.epoch_timestamp,
     pivoted.hrv,
     pivoted.heart_rate,
