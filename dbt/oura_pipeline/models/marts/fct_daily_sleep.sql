@@ -10,6 +10,7 @@ sleep_records AS (
 
 SELECT
     daily_sleep.sleep_score,
+    daily_sleep.id AS sleep_id,
     daily_sleep.sleep_score_contributor_efficiency,
     daily_sleep.sleep_score_contributor_latency,
     daily_sleep.sleep_score_contributor_rem_sleep,

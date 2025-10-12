@@ -1,31 +1,100 @@
-#File:  docker-compose.yml
 version: '3.8'
+
+networks:
+  oura-net:
 
 services:
   db:
-    image: postgres:15-alpine  # Use a specific, lightweight version
+    image: postgres:15-alpine
     container_name: oura_postgres
     restart: always
     environment:
       - POSTGRES_USER=myuser
       - POSTGRES_PASSWORD=mypassword
       - POSTGRES_DB=ouradata
-    ports:
-      - "5432:5432" # Expose the container's port 5432 to your localhost
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  
+    networks:
+      - oura-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d ouradata"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   dashboard:
     container_name: oura_dashboard
     build: ./dashboard
     restart: always
     ports:
-      - "8501:8501" #exposes streamlit port to local machine
+      - "8501:8501"
     env_file:
-      - .env #passes .env variables like DATABASE_URL to the container
+      - .env
     depends_on:
-      - db  #start db before dashboard
+      db:
+        condition: service_healthy
     volumes:
       - ./dashboard:/app
+    networks:
+      - oura-net
+
+  airflow-init:
+    build: ./airflow
+    entrypoint: /bin/bash
+    command: -c "airflow db init && airflow users create --username admin --password admin --firstname Anonymous --lastname User --role Admin --email admin@example.com || true"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - oura-net
+
+  airflow-webserver:
+    build: ./airflow
+    command: webserver
+    ports:
+      - "8080:8080"
+    hostname: airflow-webserver
+    env_file:
+      - .env
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/scripts:/opt/airflow/scripts
+      - ./dbt/oura_pipeline:/opt/dbt
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - oura-net
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  airflow-scheduler:
+    build: ./airflow
+    command: scheduler
+    hostname: airflow-scheduler
+    env_file:
+      - .env
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/scripts:/opt/airflow/scripts
+      - ./dbt/oura_pipeline:/opt/dbt
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
+    networks:
+      - oura-net
+    healthcheck:
+      test: ["CMD", "airflow", "jobs", "check", "--job-type", "SchedulerJob", "--hostname", "airflow-scheduler"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
 volumes:
   postgres_data:
+    
+
