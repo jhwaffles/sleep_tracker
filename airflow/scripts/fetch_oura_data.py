@@ -15,9 +15,8 @@ db_engine=create_engine(DATABASE_URL)
 BASE_URL = "https://api.ouraring.com/v2/usercollection/"
 
 #PATH
-SCRIPT_DIR = Path(__file__).parent.resolve()
-PROJECT_ROOT = SCRIPT_DIR.parent.parent
-DATA_DIR = PROJECT_ROOT/"source_data"/"raw"
+AIRFLOW_HOME = os.getenv("AIRFLOW_HOME", "/opt/airflow")
+DATA_DIR = Path(AIRFLOW_HOME) / "data" / "raw"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 def fetch_oura_data(endpoint, params=None):
@@ -35,7 +34,7 @@ def fetch_oura_data(endpoint, params=None):
         print(f"An error occurred: {e}")
         return None
     
-def fetch_sleep_data(start_date, end_date):  #Sleep Routes Mulitiple. Detailed Data.
+def fetch_sleep_data(start_date, end_date):  #Sleep Routes Multiple. Detailed Data.
     """
     Sleep Routes Multiple. Detailed Data. Provides endpoint and date range and feeds into fetch_oura_data.
     """

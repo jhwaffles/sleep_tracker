@@ -1,0 +1,16 @@
+# Airflow providers
+apache-airflow-providers-postgres
+
+# dbt (Py3.12 compatible)
+dbt-core>=1.9,<1.11
+dbt-postgres>=1.9,<1.11
+
+# ML & Data Scripts
+pandas>=2.2
+pyarrow>=15
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+python-dotenv>=1.0
+scikit-learn>=1.5
+plotly>=5.22
+ruptures>=1.1

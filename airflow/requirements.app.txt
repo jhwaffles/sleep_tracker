@@ -1,0 +1,9 @@
+dbt-core>=1.9,<1.11
+dbt-postgres>=1.9,<1.11
+
+# your other libs
+pandas==2.1.4
+pyarrow==15.*           # avoids pulling latest that may want newer pandas
+psycopg2-binary==2.9.*
+python-dotenv==1.*
+requests>=2.31,<3
